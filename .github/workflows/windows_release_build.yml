@@ -22,6 +22,9 @@ jobs:
         shell: pwsh
         run: |
           $GeodeInclude = "${{ github.workspace }}\third_party\geode\loader\include"
+          Write-Host "-- DEBUG: Listing Geode include dir contents --"
+          Get-ChildItem -Path $GeodeInclude -Recurse -Force | Select-Object FullName | ForEach-Object { Write-Host $_.FullName }
+          Write-Host "-- END DEBUG --"
           # Provide windows-style semicolon-separated libs. The repo includes several .lib files under link/win64
           $libs = @(
             "${{ github.workspace }}\third_party\geode\loader\include\link\win64\libcocos2d.lib",
