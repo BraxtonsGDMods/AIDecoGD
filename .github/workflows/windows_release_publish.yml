@@ -1,0 +1,89 @@
+name: Build & Publish Windows Release
+
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  build-and-publish:
+    runs-on: windows-latest
+    env:
+      BUILD_DIR: build-release
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure and build (Release)
+        shell: pwsh
+        run: |
+          $GeodeInclude = "${{ github.workspace }}\third_party\geode\loader\include"
+          $libs = @(
+            "${{ github.workspace }}\third_party\geode\loader\include\link\win64\libcocos2d.lib",
+            "${{ github.workspace }}\third_party\geode\loader\include\link\win64\libExtensions.lib",
+            "${{ github.workspace }}\third_party\geode\loader\include\link\win64\glew32.lib",
+            "${{ github.workspace }}\third_party\geode\loader\include\link\win64\fmod.lib",
+            "${{ github.workspace }}\third_party\geode\loader\include\link\win64\gd-libcurl.lib",
+            "${{ github.workspace }}\third_party\geode\loader\include\link\win64\nghttp2.lib",
+            "${{ github.workspace }}\third_party\geode\loader\include\link\win64\libcurl.lib"
+          ) -join ";"
+
+          Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
+          ./tools/build_release_win.ps1 -GeodeInclude $GeodeInclude -GeodeLibs $libs -BuildDir $env:BUILD_DIR
+
+      - name: Prepare mod package
+        shell: pwsh
+        run: |
+          $out = "${{ github.workspace }}\$env:BUILD_DIR\Release\ai_deco.dll"
+          if (-Not (Test-Path $out)) { Write-Error "Could not find ai_deco.dll at $out"; exit 1 }
+
+          # Create a packaging directory for the mod (mod.json + DLL + resources)
+          $pkgDir = "${{ github.workspace }}\packaging\ai-deco"
+          Remove-Item -Recurse -Force -ErrorAction SilentlyContinue $pkgDir
+          New-Item -ItemType Directory -Path $pkgDir | Out-Null
+
+          # Copy mod.json
+          Copy-Item -Path "${{ github.workspace }}\mod.json" -Destination $pkgDir
+          # Copy the DLL
+          Copy-Item -Path $out -Destination (Join-Path $pkgDir 'ai_deco.dll')
+          # Copy resources (UI/res) if present
+          if (Test-Path "${{ github.workspace }}\resources") {
+              Copy-Item -Path "${{ github.workspace }}\resources" -Destination $pkgDir -Recurse
+          }
+
+          # Create a zip package
+          $zip = "${{ github.workspace }}\build-release-asset.zip"
+          if (Test-Path $zip) { Remove-Item $zip }
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          [System.IO.Compression.ZipFile]::CreateFromDirectory($pkgDir, $zip)
+          Write-Host "Created package: $zip"
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: ${{ github.ref_name }}
+          body: "Windows release built from tag ${{ github.ref_name }}"
+
+      - name: Upload release assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}\build-release\Release\ai_deco.dll
+          asset_name: ai_deco.dll
+          asset_content_type: application/octet-stream
+
+      - name: Upload packaged zip
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}\build-release-asset.zip
+          asset_name: ai-deco-mod.zip
+          asset_content_type: application/zip

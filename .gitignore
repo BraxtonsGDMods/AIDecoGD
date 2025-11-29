@@ -1,0 +1,22 @@
+# Build artifacts
+build/
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Editor / IDE files
+.vscode/
+*.suo
+*.user
+*.sln
+*.vcxproj*
+
+# Misc
+.DS_Store
+*.log
+
+# Ignore any accidental geode-main uploads (user SDK - should not be committed)
+geode-main/

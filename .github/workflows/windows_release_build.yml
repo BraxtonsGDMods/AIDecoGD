@@ -1,0 +1,48 @@
+name: Build Windows Release (Geode)
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    env:
+      BUILD_DIR: build-windows
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Qt / Visual Studio env (cached)
+        uses: microsoft/setup-msbuild@v1
+
+      - name: Configure and build (Release)
+        shell: pwsh
+        run: |
+          $GeodeInclude = "${{ github.workspace }}\third_party\geode\loader\include"
+          # Provide windows-style semicolon-separated libs. The repo includes several .lib files under link/win64
+          $libs = @(
+            "${{ github.workspace }}\third_party\geode\loader\include\link\win64\libcocos2d.lib",
+            "${{ github.workspace }}\third_party\geode\loader\include\link\win64\libExtensions.lib",
+            "${{ github.workspace }}\third_party\geode\loader\include\link\win64\glew32.lib",
+            "${{ github.workspace }}\third_party\geode\loader\include\link\win64\fmod.lib",
+            "${{ github.workspace }}\third_party\geode\loader\include\link\win64\gd-libcurl.lib",
+            "${{ github.workspace }}\third_party\geode\loader\include\link\win64\nghttp2.lib",
+            "${{ github.workspace }}\third_party\geode\loader\include\link\win64\libcurl.lib"
+          ) -join ";"
+
+          Write-Host "Geode include: $GeodeInclude"
+          Write-Host "Geode libs: $libs"
+
+          # Ensure the build script is executable
+          Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
+
+          ./tools/build_release_win.ps1 -GeodeInclude $GeodeInclude -GeodeLibs $libs -BuildDir $env:BUILD_DIR
+
+      - name: Upload DLL artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai_deco-windows-release
+          path: ${{ env.BUILD_DIR }}\Release\ai_deco.dll
