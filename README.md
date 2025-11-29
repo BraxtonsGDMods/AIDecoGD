@@ -90,6 +90,22 @@ You can quickly create a distributable ZIP containing your mod ready to drop int
 
 This script will create a ZIP containing only `mod.json`, `ai_deco.dll`, and `resources/` so you can publish the package without bundling the Geode SDK.
 
+.geode packages (one-file installers)
+----------------------------------
+This repository packs the mod contents into a standard ZIP-based package with a `.geode` extension (a zip archive renamed to `.geode`). Geode-compatible installers and some distribution channels accept `.geode` files as single-file mod packages.
+
+How to use a `.geode` file:
+- Download the `.geode` asset from the Release (e.g., `ai-deco.geode`).
+- If your Geode installs accept `.geode` files directly you can follow your usual process (some launchers allow double-click or drag & drop). Otherwise, treat it like a zip:
+	- Rename `.geode` to `.zip` and extract OR open it with any archive manager.
+	- Confirm the top-level folder is `ai-deco/` and that inside it are `mod.json` + `ai_deco.dll` + `resources/`.
+	- Place the `ai-deco` folder into your Geode mods folder:
+		- `%localappdata%\GeometryDash\mods\ai-deco\` on Windows.
+
+Notes:
+- `.geode` is only a convenient package format — the internal contents must still be `mod.json` + DLL + resources.
+- Always use the CI-built Windows `.geode` or `.dll` artifact that matches your Geometry Dash/Geode bitness and version. If your game is 32-bit you must use a 32-bit mod binary; for 64-bit use a 64-bit binary.
+
 Testing the produced DLL in Geometry Dash
 ---------------------------------------
 
