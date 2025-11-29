@@ -10,6 +10,9 @@ namespace aid {
 
 GDObjectList selection_to_stubs() {
 #ifdef GEODE
+// Pull in Geode + game headers so GEODE builds can reference game symbols
+#include <Geode/loader/Loader.hpp>
+#include <cocos2d.h>
     // TODO: Replace this pseudo-code with an actual Geode+GeometryDash API to
     // convert real editor selection into GDObjectStub objects. Geode does not
     // provide the game-specific selection types in this repo so we use a
