@@ -6,7 +6,7 @@ project(AI_Deco LANGUAGES CXX)
 # link against Geode and Geometry Dash libraries. This file organizes sources
 # and sets C++ standard to C++17 (as requested).
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(FetchContent)
