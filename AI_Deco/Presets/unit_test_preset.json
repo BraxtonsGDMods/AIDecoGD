@@ -1,0 +1,7 @@
+{
+  "description": "Unit test preset file.",
+  "detail": 0,
+  "name": "unit_test_preset",
+  "prompt": "neon test",
+  "seed": 999
+}
