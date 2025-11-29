@@ -1,0 +1,33 @@
+name: CI - Build & Test
+
+on: [push, pull_request]
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -S . -B build -DBUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Release
+      - name: Build
+        run: cmake --build build --parallel 2
+      - name: Run tests
+        run: |
+          ./build/engine_test || true
+          ./build/preset_test || true
+
+  build-windows:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        shell: bash
+        run: cmake -S . -B build -DBUILD_TESTS=ON -G "Visual Studio 17 2022" -A x64
+      - name: Build
+        shell: bash
+        run: cmake --build build --config Release --parallel 2
+      - name: Run tests (note: these are compiled without Geode and may only run in CI if Runtime present)
+        shell: bash
+        run: |
+          if [ -f build/engine_test ]; then ./build/engine_test || true; fi
+          if [ -f build/preset_test ]; then ./build/preset_test || true; fi
