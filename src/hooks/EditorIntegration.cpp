@@ -6,6 +6,12 @@
 #include "../../include/EditorIntegration.hpp"
 #include <iostream>
 
+#ifdef GEODE
+// Pull in Geode + game headers so GEODE builds can reference game symbols
+#include <Geode/loader/Loader.hpp>
+#include <cocos2d.h>
+#endif
+
 namespace aid {
 
 GDObjectList selection_to_stubs() {
