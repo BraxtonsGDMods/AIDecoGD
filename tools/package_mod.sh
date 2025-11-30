@@ -22,6 +22,7 @@ fi
 echo "Using DLL: $DLL_PATH"
 
 TMPDIR=$(mktemp -d)
+OUT_ABS=$(realpath -m "$OUT")
 mkdir -p "$TMPDIR/ai-deco"
 cp mod.json "$TMPDIR/ai-deco/"
 cp "$DLL_PATH" "$TMPDIR/ai-deco/ai_deco.dll"
@@ -30,9 +31,24 @@ if [ -d resources ]; then
 fi
 
 pushd "$TMPDIR" >/dev/null
-zip -r "$OUT" ai-deco
+zip -r "$OUT_ABS" ai-deco
 popd >/dev/null
 
 echo "Created $OUT"
 
 rm -rf "$TMPDIR"
+
+# If user asked for a .geode file (common installer format for Geode) and
+# provided a .zip, or if the OUT filename ends with .geode, create a .geode
+# copy (zip archive with .geode extension). This keeps the script backwards
+# compatible while supporting one-file installers.
+if [[ "$OUT" == *.geode ]]; then
+  # already a .geode filename -> nothing to do
+  exit 0
+fi
+
+if [[ "$OUT" == *.zip ]]; then
+  GEODE_OUT=$(dirname "$OUT")/ai-deco.geode
+  cp "$OUT" "$GEODE_OUT"
+  echo "Also created $GEODE_OUT" 
+fi

@@ -68,7 +68,12 @@ git tag v0.1.0
 git push origin v0.1.0
 ```
 
-2) Wait for the GitHub Actions run to complete. The release will appear on the repository's Releases page. Download `ai-deco-mod.zip` and drop its contents into Geometry Dash's Geode mods directory or instruct users to unzip the folder into their mods folder.
+2) Wait for the GitHub Actions run to complete. The release will appear on the repository's Releases page. Download `ai-deco-mod.zip` or `ai-deco.geode` and install it into your Geometry Dash / Geode mods directory:
+
+- To install from a `.geode` file: double-click (if your Geode installer supports it) or rename to `.zip` and extract the `ai-deco/` folder into your Geode mods directory.
+- To install from a `.zip`: extract `ai-deco/` and place the folder into your Geode mods directory.
+
+Always ensure you use the DLL that matches your game's bitness (x86 vs x64) and the Geometry Dash version supported by the linked Geode libs.
 
 Important notes about including SDKs and source in releases
 ---------------------------------------------------------
@@ -80,7 +85,7 @@ Local packaging helper
 You can quickly create a distributable ZIP containing your mod ready to drop into Geometry Dash using the included helper script (uses the locally-built DLL):
 
 ```bash
-./tools/package_mod.sh [PATH_TO_DLL] [OUT_ZIP]
+./tools/package_mod.sh [PATH_TO_DLL] [OUT_ZIP|OUT_.geode]
 
 # Example (auto-find):
 ./tools/package_mod.sh
@@ -88,11 +93,19 @@ You can quickly create a distributable ZIP containing your mod ready to drop int
 ./tools/package_mod.sh build/ai_deco.dll build/ai_deco_manual.zip
 ```
 
-This script will create a ZIP containing only `mod.json`, `ai_deco.dll`, and `resources/` so you can publish the package without bundling the Geode SDK.
+This script will create a ZIP containing only `mod.json`, `ai_deco.dll`, and `resources/` so you can publish the package without bundling the Geode SDK. If you provide an .zip output the script will also produce a `.geode` copy in the same directory (a `.geode` file is simply a zip archive with the .geode extension). You can also pass a .geode filename as the output to create that directly.
+
+For convenience there's a small helper script that packages the build artifact into a `.geode` in `build/`:
+
+```bash
+./tools/make_geode.sh [PATH_TO_DLL]
+```
+
+If no PATH_TO_DLL is provided the helper script will look for `build/ai_deco.dll` or `build/Release/ai_deco.dll` automatically.
 
 .geode packages (one-file installers)
 ----------------------------------
-This repository packs the mod contents into a standard ZIP-based package with a `.geode` extension (a zip archive renamed to `.geode`). Geode-compatible installers and some distribution channels accept `.geode` files as single-file mod packages.
+This repository packs the mod contents into a standard ZIP-based package with a `.geode` extension (a zip archive renamed to `.geode`). Geode-compatible installers and some distribution channels accept `.geode` files as single-file mod packages. Use `tools/make_geode.sh` locally to create a `.geode` from a built DLL.
 
 How to use a `.geode` file:
 - Download the `.geode` asset from the Release (e.g., `ai-deco.geode`).
