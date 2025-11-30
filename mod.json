@@ -1,7 +1,7 @@
 {
   "id": "ai-deco",
   "name": "AI Deco",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Decorative AI-inspired object generator for Geometry Dash (Geode mod scaffold).",
   "authors": ["BraxtonsGDMods"],
   "license": "MIT",
